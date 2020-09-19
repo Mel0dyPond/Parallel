@@ -79,6 +79,7 @@ int main()
       for(index = 0; index < 3; index++)
          {
             pthread_join(thread_array[index], NULL);
+            free(arg_array[index]);
          }
       
       printf("Total sequences generated: %d\n", times_ran);

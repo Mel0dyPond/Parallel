@@ -160,6 +160,7 @@ int main()
       for(index = 0; index < 6; index++)
          {
             pthread_join(thread_array[index], NULL);
+            free(arg[index]);
          }
       
       
