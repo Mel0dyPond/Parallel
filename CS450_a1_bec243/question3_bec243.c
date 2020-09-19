@@ -22,20 +22,16 @@ void *do_work(void *arg)
       
       while(total < 990)
          {
-            if(id == (*last_added) + 1)
+            if(id == (*last_added) + 1 && total != 990)
                {
-                  if(total < 990)
-                     {
-                        total += id;
-                        *last_added = id;
-                        printf("my num: %d, total: %d\n", id, total);
-                        
-                        if(*last_added == 9)
-                           {
-                              *last_added = -1;
-                           }
-                     }
+                  total += id;
+                  printf("my num: %d, total: %d\n", id, total);
+                  *last_added = id;
                   
+                  if(*last_added == 9)
+                     {
+                        *last_added = -1;
+                     }
                }
          }
       
