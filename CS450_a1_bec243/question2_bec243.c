@@ -19,87 +19,87 @@ struct arguments
 
 void *do_work(void *arg)
    {
-      struct arguments *args = (struct arguments *) arg;
-      int generate = args->generate;
+      struct arguments *args = (struct arguments *)arg;
+      int id = args->generate;
       int *times_ran = args->times_ran;
       int *correct_runs = args->correct_runs;
-      int *array_index = args->index;
       int *array = args->array;
+      int *index = args->index;
       bool *other_finished = args->other_finished;
       
       while(*correct_runs < 10 && *other_finished == false)
          {
-            printf("My id: %d\n", generate);
-            array[*array_index] = generate;
-            (*array_index)++;
+            
+            if(*index == 3)
+               {
+                  *index = 4;
+                  if(array[0] == 1 && array[1] == 2 && array[2] == 3)
+                     {
+                        printf("123\n");
+                        (*correct_runs)++;
+                     }
+                  (*times_ran)++;
+                  array[0] = array[1] = array[2] = 0;
+                  *index = 0;
+               }
+               
+            printf("My id: %d\n", id);
+            array[*index] = id;
+            (*index)++;
             
             usleep(500000);
             
-            // array full
-            if(*array_index == 3)
-               {
-                  if(array[0] == 1 && array[1] == 2 && array[2] == 3)
-                     {
-                        (*correct_runs)++;
-                        printf("123\n");
-                     }
-                  
-                  array[0] = array[1] = array[2] = 0;
-                  *array_index = 0;
-                  (*times_ran)++;
-               }
-          
          }
-      
-      if(*correct_runs == 10 && *other_finished == false)
+         
+      if(*other_finished == false)
          {
             *other_finished = true;
-            printf("Team 1 won!\n");
-         }
+            printf("Team 1 Won!\n");
+         }   
       
       return NULL;
    }
    
 void *do_work2(void *arg)
    {
-      struct arguments *args = (struct arguments *) arg;
-      int generate = args->generate;
+      struct arguments *args = (struct arguments *)arg;
+      int id = args->generate;
       int *times_ran = args->times_ran;
       int *correct_runs = args->correct_runs;
-      int *array_index = args->index;
       int *array = args->array;
+      int *index = args->index;
       bool *other_finished = args->other_finished;
       
       while(*correct_runs < 10 && *other_finished == false)
          {
-            printf("My id: %d\n", generate);
-            array[*array_index] = generate;
-            (*array_index)++;
+            
+            if(*index == 3)
+               {
+                  *index = 4;
+                  if(array[0] == 4 && array[1] == 5 && array[2] == 6)
+                     {
+                        printf("456\n");
+                        (*correct_runs)++;
+                     }
+                  (*times_ran)++;
+                  array[0] = array[1] = array[2] = 0;
+                  *index = 0;
+               }
+               
+            printf("My id: %d\n", id);
+            array[*index] = id;
+            (*index)++;
             
             usleep(500000);
             
-            // array full
-            if(*array_index == 3)
-               {
-                  if(array[0] == 4 && array[1] == 5 && array[2] == 6)
-                     {
-                        (*correct_runs)++;
-                        printf("456\n");
-                     }
-                  
-                  array[0] = array[1] = array[2] = 0;
-                  *array_index = 0;
-                  (*times_ran)++;
-               }
-          
          }
-      
-      if(*correct_runs == 10 && *other_finished == false)
+         
+      if(*other_finished == false)
          {
             *other_finished = true;
-            printf("Team 2 won!\n");
+            printf("Team 2 Won!\n");
          }
-      
+         
       return NULL;
    }
 
@@ -168,6 +168,7 @@ int main()
       printf("Number of correct sequences team1: %d\n", correct_runs1);
       printf("Total sequences generated team2: %d\n", times_ran2);
       printf("Number of correct sequences team2: %d\n", correct_runs2);
+      
       
       return 0;
    }
