@@ -32,6 +32,18 @@ void *do_work(void *arg)
       while(*correct_runs < 10 && *other_finished == false)
          {
             pthread_mutex_lock(&lock);
+            if(*index < 3)
+               {
+                  printf("My id: %d\n", id);
+                  array[*index] = id;
+                  (*index)++;
+               }
+            pthread_mutex_unlock(&lock);
+            
+            usleep(500000);
+            
+            
+            pthread_mutex_lock(&lock);
             if(*index == 3)
                {
                   if(array[0] == 1 && array[1] == 2 && array[2] == 3)
@@ -44,12 +56,8 @@ void *do_work(void *arg)
                   *index = 0;
                }
                
-            printf("My id: %d\n", id);
-            array[*index] = id;
-            (*index)++;
-            pthread_mutex_unlock(&lock);
             
-            usleep(500000);
+            pthread_mutex_unlock(&lock);
             
          }
          
@@ -78,9 +86,19 @@ void *do_work2(void *arg)
       while(*correct_runs < 10 && *other_finished == false)
          {
             pthread_mutex_lock(&lock);
+            if(*index < 3)
+               {
+                  printf("My id: %d\n", id);
+                  array[*index] = id;
+                  (*index)++;
+               }
+            pthread_mutex_unlock(&lock);
+            
+            usleep(500000);
+            
+            pthread_mutex_lock(&lock);
             if(*index == 3)
                {
-                  *index = 4;
                   if(array[0] == 4 && array[1] == 5 && array[2] == 6)
                      {
                         printf("456\n");
@@ -91,12 +109,8 @@ void *do_work2(void *arg)
                   *index = 0;
                }
                
-            printf("My id: %d\n", id);
-            array[*index] = id;
-            (*index)++;
             pthread_mutex_unlock(&lock);
             
-            usleep(500000);
             
          }
          
