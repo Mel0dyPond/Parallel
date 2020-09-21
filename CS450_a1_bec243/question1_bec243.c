@@ -10,6 +10,7 @@ struct arguments
       int *correct_runs;
       int *index;
       int *array;
+      pthread_mutex_t lock;
    };
 
 void *do_work(void *arg)
@@ -20,18 +21,23 @@ void *do_work(void *arg)
       int *correct_runs = args->correct_runs;
       int *array_index = args->index;
       int *array = args->array;
+      pthread_mutex_t lock = args->lock;
       
       while(*correct_runs < 10)
          {
+            pthread_mutex_lock(&lock);
             printf("My id: %d\n", generate);
             array[*array_index] = generate;
             (*array_index)++;
+            pthread_mutex_unlock(&lock);
             
             usleep(500000);
             
             // array full
+            pthread_mutex_lock(&lock);
             if(*array_index == 3)
                {
+                  
                   if(array[0] == 1 && array[1] == 2 && array[2] == 3)
                      {
                         (*correct_runs)++;
@@ -41,8 +47,9 @@ void *do_work(void *arg)
                   array[0] = array[1] = array[2] = 0;
                   *array_index = 0;
                   (*times_ran)++;
+                  
                }
-          
+            pthread_mutex_unlock(&lock); 
          }
       
       
@@ -57,8 +64,11 @@ int main()
       int times_ran = 0;
       int correct_runs = 0;
       int store_array[3] = {};
+      pthread_mutex_t lock;
       pthread_t thread_array[3];
       struct arguments *arg_array[3];
+      
+      pthread_mutex_init(&lock, NULL);
       
       for(index = 0; index < 3; index++)
          {
@@ -70,6 +80,7 @@ int main()
             arg_array[index]->correct_runs = &correct_runs;
             arg_array[index]->index = &array_index;
             arg_array[index]->array = store_array;
+            arg_array[index]->lock = lock;
             
             
             pthread_create(&thread_array[index], NULL, 

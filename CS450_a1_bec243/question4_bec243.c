@@ -8,7 +8,8 @@ struct arguments
       int *counter;
       int *times_ran;
       pthread_mutex_t lock;
-      pthread_cond_t condition;
+      pthread_cond_t full;
+      pthread_cond_t empty;
    };
 
 void *increment_work(void *arg)
@@ -17,7 +18,8 @@ void *increment_work(void *arg)
       int *counter = args->counter;
       int *times_ran = args->times_ran;
       pthread_mutex_t lock = args->lock;
-      pthread_cond_t condition = args->condition;
+      pthread_cond_t full = args->full;
+      pthread_cond_t empty = args->empty;
       
       int index = 0;
       
@@ -26,17 +28,17 @@ void *increment_work(void *arg)
             pthread_mutex_lock(&lock);
             while(*counter == 10)
                {
-                  pthread_cond_wait(&condition, &lock);
+                  pthread_cond_wait(&full, &lock);
                }
             
-            for(index = 0; index < 10; index++ )
+            for(index = 0; index < 10 && *times_ran < 50; index++ )
                {
                   (*counter)++;
                   printf("Count is now (inc fn): %d\n", *counter);
                   (*times_ran)++;
                }
             
-            pthread_cond_signal(&condition);
+            pthread_cond_signal(&empty);
             pthread_mutex_unlock(&lock);
             
             usleep(500000);
@@ -51,31 +53,30 @@ void *decrement_work(void *arg)
       int *counter = args->counter;
       int *times_ran = args->times_ran;
       pthread_mutex_t lock = args->lock;
-      pthread_cond_t condition = args->condition;
+      pthread_cond_t full = args->full;
+      pthread_cond_t empty = args->empty;
       
       int index = 0;
       
       while(*times_ran < 50)
          {
-            usleep(500000);
-            
             pthread_mutex_lock(&lock);
             while(*counter == 0)
                {
-                  pthread_cond_wait(&condition, &lock);
+                  pthread_cond_wait(&empty, &lock);
                }
             
-            for(index = 0; index < 10; index++ )
+            for(index = 0; index < 10 && *times_ran < 50; index++ )
                {
                   (*counter)--;
                   printf("Count is now (dec fn): %d\n", *counter);
                   (*times_ran)++;
                }
             
-            pthread_cond_signal(&condition);
+            pthread_cond_signal(&full);
             pthread_mutex_unlock(&lock);
             
-            
+            usleep(500000);
          }
       
       return NULL;
@@ -88,26 +89,29 @@ int main()
       int counter = 0;
       int times_ran = 0;
       pthread_t thread_1, thread_2;
-      pthread_mutex_t lock_inc, lock_dec;
-      pthread_cond_t condition;
+      pthread_mutex_t lock;
+      pthread_cond_t full;
+      pthread_cond_t empty;
       struct arguments *arg1, *arg2;
       
-      pthread_mutex_init(&lock_inc, NULL);
-      pthread_mutex_init(&lock_dec, NULL);
-      pthread_cond_init(&condition, NULL);
+      pthread_mutex_init(&lock, NULL);
+      pthread_cond_init(&full, NULL);
+      pthread_cond_init(&empty, NULL);
       
       arg1 = (struct arguments *) 
          calloc(1, sizeof(struct arguments));
       arg1->counter = &counter;
-      arg1->lock = lock_inc;
-      arg1->condition = condition;
+      arg1->lock = lock;
+      arg1->full = full;
+      arg1->empty = empty;
       arg1->times_ran = &times_ran;
       
       arg2 = (struct arguments *) 
          calloc(1, sizeof(struct arguments));
       arg2->counter = &counter;
-      arg2->lock = lock_dec;
-      arg2->condition = condition;
+      arg2->lock = lock;
+      arg1->full = full;
+      arg1->empty = empty;
       arg2->times_ran = &times_ran;
       
       

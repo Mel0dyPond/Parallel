@@ -13,6 +13,7 @@ struct arguments
       int *index;
       int *array; 
       bool *other_finished;
+      pthread_mutex_t lock;
    };
 
 
@@ -26,13 +27,13 @@ void *do_work(void *arg)
       int *array = args->array;
       int *index = args->index;
       bool *other_finished = args->other_finished;
+      pthread_mutex_t lock = args->lock;
       
       while(*correct_runs < 10 && *other_finished == false)
          {
-            
+            pthread_mutex_lock(&lock);
             if(*index == 3)
                {
-                  *index = 4;
                   if(array[0] == 1 && array[1] == 2 && array[2] == 3)
                      {
                         printf("123\n");
@@ -46,6 +47,7 @@ void *do_work(void *arg)
             printf("My id: %d\n", id);
             array[*index] = id;
             (*index)++;
+            pthread_mutex_unlock(&lock);
             
             usleep(500000);
             
@@ -53,8 +55,10 @@ void *do_work(void *arg)
          
       if(*other_finished == false)
          {
+            pthread_mutex_lock(&lock);
             *other_finished = true;
             printf("Team 1 Won!\n");
+            pthread_mutex_unlock(&lock);
          }   
       
       return NULL;
@@ -69,10 +73,11 @@ void *do_work2(void *arg)
       int *array = args->array;
       int *index = args->index;
       bool *other_finished = args->other_finished;
+      pthread_mutex_t lock = args->lock;
       
       while(*correct_runs < 10 && *other_finished == false)
          {
-            
+            pthread_mutex_lock(&lock);
             if(*index == 3)
                {
                   *index = 4;
@@ -89,6 +94,7 @@ void *do_work2(void *arg)
             printf("My id: %d\n", id);
             array[*index] = id;
             (*index)++;
+            pthread_mutex_unlock(&lock);
             
             usleep(500000);
             
@@ -96,8 +102,10 @@ void *do_work2(void *arg)
          
       if(*other_finished == false)
          {
+            pthread_mutex_lock(&lock);
             *other_finished = true;
             printf("Team 2 Won!\n");
+            pthread_mutex_unlock(&lock);
          }
          
       return NULL;
@@ -110,11 +118,15 @@ int main()
       int array1[3] = {};
       int times_ran1 = 0;
       int correct_runs1 = 0;
+      pthread_mutex_t lock1;
+      pthread_mutex_init(&lock1, NULL);
       
       int array_index2 = 0;
       int array2[3] = {};
       int times_ran2 = 0;
       int correct_runs2 = 0;
+      pthread_mutex_t lock2;
+      pthread_mutex_init(&lock2, NULL);
       
       bool other_finished = false;
       
@@ -133,6 +145,7 @@ int main()
             arg[index]->index = &array_index1;
             arg[index]->array = array1;
             arg[index]->other_finished = &other_finished;
+            arg[index]->lock = lock1;
          }
          
       for(index = 3; index < 6; index++)
@@ -146,6 +159,7 @@ int main()
             arg[index]->index = &array_index2;
             arg[index]->array = array2;
             arg[index]->other_finished = &other_finished;
+            arg[index]->lock = lock2;
          }
          
       for(index = 0; index < 3; index++)
